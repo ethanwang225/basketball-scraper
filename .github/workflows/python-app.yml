@@ -4,10 +4,15 @@
 name: automate web scrape
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  schedule:
+    - cron: '0 9 1,16 * *'
+  #https://crontab.guru/ to help you with timing
+
+  
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
 
 
