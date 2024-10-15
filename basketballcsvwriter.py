@@ -87,6 +87,7 @@ for player in all_players:
     csv.write( birthplace+ "," ) 
     csv.write("\n")
     csv.close()
+    print("added " + stats[0].text)
     rank+=1
 
 
