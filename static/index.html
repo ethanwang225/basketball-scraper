@@ -5,12 +5,28 @@
             function getPlayer(){
                 const value=document.getElementById("player").value //Gets what the user typed in the player text box
                 //getElementById looks into html and finds element with the id
+                const season=document.getElementById("season").value 
+
+                const team=document.getElementById("team").value
+
+                const pts=document.getElementById("pts").value 
 
                 const baseurl=window.location.href.split("?")[0]
                 
 
-                const newurl=`${baseurl}/players?name=${value}`
+                let newurl=`${baseurl}players?name=${value}`
+                if (season != ""){
+                    newurl+=`&season=${season}`
+                }
+                if (pts != ""){
+                    newurl+=`&pts=${pts}`
+                }
+                if (team!=""){
+                    newurl+=`&team=${team}`
+                }
+
                 //${} allows yout to put variables inside the string
+                console.log(newurl)
 
                fetchfromserver(newurl)
             }
@@ -24,15 +40,7 @@
 
                fetchfromserver(newurl)
             }
-            function getBirthPlace(){
-                const value=document.getElementById("birthplace").value 
-
-                const baseurl=window.location.href.split("?")[0]
-                
-
-                const newurl=`${baseurl}/players?birthplace=${value}`
-               fetchfromserver(newurl)
-            }
+            
             function fetchfromserver(url){
                 fetch(url) //like request in python --> get url
                     .then((response) => response.json()) // response.json gives you either 200s or 404, which is error: then wait for request, then get response back. turn it into json to be readable
@@ -96,11 +104,10 @@
         basketball stats api
         </h1>
             
-        <label for="player">First name:</label>
+        <label for="player">Full Name:</label>
         <input type="text" id="player" name="player"><br><br>
         
         
-        <button onclick="getPlayer()">Submit</button>
 
 
         <ul id="playerresult">
@@ -110,15 +117,18 @@
 
 
 
-            <label for="birthplace">Birthplace:</label>
-
-            <input type="text" id="birthplace" name="birthplace"><br><br>
-            <button onclick="getBirthPlace()">Submit</button><br><br>
-
+        <label for="season">Season:</label>
         
-            <label for="age">Age:</label>
-            <input type="text" id="age" name="age"><br><br>
-            <button onclick="getAge()">Submit</button>
+
+        <input type="text" id="season" name="season"><br><br>
+
+        <label for="team">Team:</label>
+        <input type="text" id="team" name="team"><br><br>
+
+
+        <label for="pts">Points:</label>
+        <input type="text" id="pts" name="pts"><br><br>
+        <button onclick="getPlayer()">Submit</button>
 
     </body>
     

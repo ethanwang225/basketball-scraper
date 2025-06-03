@@ -17,7 +17,7 @@ def hello():
     #if the "name" is not there the variable will be empty
     print(name_query)
 
-    # gives you joel, if you put /players$name=joel
+    # gives you joel, if you put joel into the query on the website 
     
     
     with open("data/player_stats.json") as file: # Opens json file
