@@ -11,7 +11,7 @@ soup=BeautifulSoup(page.text, "html.parser")
 print(soup)
 
 all_players=soup.find_all("tr")
-print(all_players)
+
 for player in all_players:
     # print(player.text)
     #.text here removes the html tags

@@ -31,10 +31,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+      ##requirements tells the remote runner what packages you need during the run
+
     - name: run scripts
       run: python basketballcsvwriter.py
+        ##change this file to whatever file you want to automatically run 
     - name: commit
-      run: | 
+      run: | ## bar allows you to run multiple scripts at once 
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add -A

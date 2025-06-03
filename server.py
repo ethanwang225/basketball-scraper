@@ -12,6 +12,7 @@ def html():
 def hello():
     name_query = request.args.get("name") # query from the website url #different from the normal (url) requests
     age_query= request.args.get("age")
+    birthplace_query=request.args.get("birthplace")
     #checks input of query if user inputs a "name"
     #if the "name" is not there the variable will be empty
     print(name_query)

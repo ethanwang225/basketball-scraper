@@ -1,17 +1,125 @@
 <html>
     <head>
+        <script>
+            
+            function getPlayer(){
+                const value=document.getElementById("player").value //Gets what the user typed in the player text box
+                //getElementById looks into html and finds element with the id
 
+                const baseurl=window.location.href.split("?")[0]
+                
+
+                const newurl=`${baseurl}/players?name=${value}`
+                //${} allows yout to put variables inside the string
+
+               fetchfromserver(newurl)
+            }
+            function getAge(){
+                const value=document.getElementById("age").value 
+
+                const baseurl=window.location.href.split("?")[0]
+                
+
+                const newurl=`${baseurl}/players?age=${value}`
+
+               fetchfromserver(newurl)
+            }
+            function getBirthPlace(){
+                const value=document.getElementById("birthplace").value 
+
+                const baseurl=window.location.href.split("?")[0]
+                
+
+                const newurl=`${baseurl}/players?birthplace=${value}`
+               fetchfromserver(newurl)
+            }
+            function fetchfromserver(url){
+                fetch(url) //like request in python --> get url
+                    .then((response) => response.json()) // response.json gives you either 200s or 404, which is error: then wait for request, then get response back. turn it into json to be readable
+                    .then(function(result) { //after json conversion, change p tag in HTML to the result
+
+                        //function(result) is an anonomyous function meaning that it is a function without a name– most useful for one time use
+                        //and can be rewritten as (response)=> whatever you want inside easier to write for one liners, like above 
+                        console.log(result)
+                        const statlist= document.getElementById("playerresult")
+                        statlist.innerHTML=``
+
+                        if(Object.prototype.toString.call(result) === '[object Array]') {
+                            //checking using triple equals check if they're the same type and the same value
+                            //double equal just checks for same value
+                            console.log(result)
+                            for(let i = 0; i<result.length;i++){
+                                statprint(result[i])
+
+                            }
+                        }
+                        else{
+                            statprint(result)
+                        }
+                    
+                    })
+            }
+            function statprint(parameter){
+                const statlist= document.getElementById("playerresult")
+               
+                
+                for (let key in parameter){
+                    const item= document.createElement("li")
+                    //create <li>
+                    const newitem=`${key}:${parameter[key]}`
+                    item.innerHTML=newitem
+                    
+                    // adds the result[key] to the inner html
+                    //.innerHTML gets the text within the <placeholder>HERE</placeholder>
+
+                    statlist.appendChild(item)
+
+
+                }
+                const breaker=document.createElement(`br`)
+                const breaker1=document.createElement(`br`)
+
+                const breaker2=document.createElement(`br`)
+
+                statlist.appendChild(breaker)
+                statlist.appendChild(breaker1)
+                statlist.appendChild(breaker2)
+
+              
+
+
+            }
+        </script>
     </head>
     <body>
         <h1>
         basketball stats api
         </h1>
-        <form>
-            <label for="player">First name:</label>
-            <input type="text" id="player" name="player"><br><br>
             
-            <input type="submit" value="Submit">
-          </form>
+        <label for="player">First name:</label>
+        <input type="text" id="player" name="player"><br><br>
+        
+        
+        <button onclick="getPlayer()">Submit</button>
+
+
+        <ul id="playerresult">
+
+        </ul><!--ul is unordered list-->
+
+
+
+
+            <label for="birthplace">Birthplace:</label>
+
+            <input type="text" id="birthplace" name="birthplace"><br><br>
+            <button onclick="getBirthPlace()">Submit</button><br><br>
+
+        
+            <label for="age">Age:</label>
+            <input type="text" id="age" name="age"><br><br>
+            <button onclick="getAge()">Submit</button>
+
     </body>
     
 </html>
