@@ -26,7 +26,7 @@ def hello():
     team_query= request.args.get("team")
     season_query=request.args.get("season")
     return jsonify({"message":"hello world"+name_query+team_query+season_query}) 
-@app.route("/players")
+@app.route("/players", methods=['GET'])
 def handlequery():
     #checks input of query if user inputs a "name"
     #if the "name" is not there the variable will be empty
