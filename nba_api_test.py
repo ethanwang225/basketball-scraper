@@ -20,7 +20,7 @@ def html():
 # https://basketball-scraper.onrender.com/players
 # https://basketball-scraper.onrender.com/hello?name="What we typed in wix"&
 
-@app.route("/hello")
+@app.route("/hello", methods=['GET'])
 def hello():
     name_query = request.args.get("name")
     team_query= request.args.get("team")
