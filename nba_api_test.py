@@ -16,7 +16,16 @@ app= Flask(__name__)
 @app.route("/")
 def html():
     return current_app.send_static_file("index.html")
-#put the @ thing and the function you want next to each other 
+#put the @ thing and the function you want next to each other
+# https://basketball-scraper.onrender.com/players
+# https://basketball-scraper.onrender.com/hello?name="What we typed in wix"&
+
+@app.route("/hello")
+def hello():
+    name_query = request.args.get("name")
+    team_query= request.args.get("team")
+    season_query=request.args.get("season")
+    return jsonify({"message":"hello world"+name_query+team_query+season_query}) 
 @app.route("/players")
 def handlequery():
     #checks input of query if user inputs a "name"
@@ -35,7 +44,7 @@ def handlequery():
 
     player_name=players.find_players_by_full_name(name_query)
 
-    
+
 
     #team_name=teams.find_teams_by_full_name(team_query)
     #result is a list of all the player that matches the query 
