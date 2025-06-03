@@ -2,3 +2,4 @@ beautifulsoup4
 flask
 requests
 gunicorn
+nba_api
