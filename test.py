@@ -1,4 +1,3 @@
-f=open("data/test.txt","w")
-f.write("hello world, ok")
-f.close()
-#
+from nba_api.stats.static import teams 
+
+print(teams.find_team_by_abbreviation("CLE"))

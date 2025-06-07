@@ -52,6 +52,9 @@ def handlequery():
     
 
     if player_name:
+        players_json={}
+        
+
         print(len(player_name))
         player_ids=[]
         for player in player_name:
@@ -59,7 +62,10 @@ def handlequery():
         #print(player_ids)
         temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0]) 
         response =temp.get_dict()
-        headers= response["resultSets"][0]["headers"]
+        headers= response["resultSets"][0]["headers"] # list
+        players_json["headers"]=headers # players_json = {"headers": [list of stat names (PTS, REB, etc.)]}
+
+
         csvfile = open('file.csv', 'w')
         for header in headers:
             csvfile.write(header + ",")
@@ -67,6 +73,7 @@ def handlequery():
         csvfile.write('\n')
 
 
+        players_json["players"]=[]
         for id in player_ids:
             csvfile = open('file.csv', 'a')
             career = playercareerstats.PlayerCareerStats(player_id=id) 
@@ -77,6 +84,8 @@ def handlequery():
         
             
             rows=response["resultSets"][0]["rowSet"]
+            players_json["players"].append(rows)
+
             if season_query:
                 newrows=[]
                 for i in range(len(rows)):
@@ -91,11 +100,6 @@ def handlequery():
                     csvfile.write(str(round(row[26]/row[6],2)))
                     csvfile.write("\n")
                 csvfile.close()
-                        
-
-                        
-                
-            
             else:    
                 for row in rows:
                     for data in row:
@@ -103,9 +107,11 @@ def handlequery():
                     csvfile.write(str(round(row[26]/row[6],2)))
                     csvfile.write("\n")
                 csvfile.close()
+
     # elif team_name:
     #     pass
     csvfile.close()
+    return jsonify(players_json)
 
 
 #for filtering stats: do response=career.get_dict()
