@@ -1,4 +1,5 @@
-from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.endpoints import playercareerstats, teamyearbyyearstats
+from nba_api.stats.library.parameters import SeasonTypeAllStar, PerModeSimple, LeagueID
 from flask import Flask, jsonify, current_app, request
 import json
 from nba_api.stats.static import players, teams
@@ -37,21 +38,27 @@ def handlequery():
     ast_query=request.args.get("ast")
     stl_query=request.args.get("stl")
     season_query=request.args.get("season")
+    seasonTquery=request.args.get("seasontype")
+    leagueTquery=request.args.get("leaguetype")
+    perGameQuery=request.args.get("pergame")
+
+
+
     
 
     #player_name=players.get_players()
     
 
-    player_name=players.find_players_by_full_name(name_query)
+    
 
-
-
+    
     #team_name=teams.find_teams_by_full_name(team_query)
     #result is a list of all the player that matches the query 
     #print(result)
     
 
-    if player_name:
+    if name_query:
+        player_name=players.find_players_by_full_name(name_query)
         players_json={}
         
 
@@ -62,6 +69,7 @@ def handlequery():
         #print(player_ids)
         temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0]) 
         response =temp.get_dict()
+        
         headers= response["resultSets"][0]["headers"] # list
         players_json["headers"]=headers # players_json = {"headers": [list of stat names (PTS, REB, etc.)]}
 
@@ -86,32 +94,63 @@ def handlequery():
             rows=response["resultSets"][0]["rowSet"]
             players_json["players"].append(rows)
 
-            if season_query:
-                newrows=[]
-                for i in range(len(rows)):
-                    if rows[i][1].startswith(str(season_query)):
-                        newrows.append(rows[i])
-                    else:
-                        pass
+        
 
-                for row in newrows:
-                    for data in row:
-                        csvfile.write(str(data) +",")
-                    csvfile.write(str(round(row[26]/row[6],2)))
-                    csvfile.write("\n")
-                csvfile.close()
-            else:    
-                for row in rows:
-                    for data in row:
-                        csvfile.write(str(data) +",")
-                    csvfile.write(str(round(row[26]/row[6],2)))
-                    csvfile.write("\n")
-                csvfile.close()
+                # newrows=[]
+                # for i in range(len(rows)):
+                #     if rows[i][1].startswith(str(season_query)):
+                #         newrows.append(rows[i])
+                #     else:
+                #         pass
 
-    # elif team_name:
-    #     pass
-    csvfile.close()
-    return jsonify(players_json)
+                # for row in newrows:
+                #     for data in row:
+                #         csvfile.write(str(data) +",")
+                #     csvfile.write(str(round(row[26]/row[6],2)))
+                #     csvfile.write("\n")
+                # csvfile.close()
+
+            
+            # else:    
+            #     for row in rows:
+            #         for data in row:
+            #             csvfile.write(str(data) +",")
+            #         csvfile.write(str(round(row[26]/row[6],2)))
+            #         csvfile.write("\n")
+            #     csvfile.close()
+        if season_query:
+            players_json["players"] = filter_by_season(players_json["players"], season_query)
+        
+        if team_query:
+            players_json["players"]=filter_by_team(players_json["players"], team_query)
+        
+        csvfile.close() 
+        return jsonify(players_json)
+
+
+    elif team_query:
+        team_info=teams.find_team_by_abbreviation(team_query)
+        print(team_info)
+        team_id=team_info['id']
+
+        team_json={}
+        
+
+        
+        #print(player_ids)
+        temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
+                                                       league_id=LeagueID.nba, 
+                                                       season_type_all_star=SeasonTypeAllStar.regular, 
+                                                       per_mode_simple= PerModeSimple.totals ) 
+        response =temp.get_dict()
+        
+        headers= response["resultSets"][0]["headers"] # list
+        team_json["headers"]=headers 
+        team_json["seasons"]=response["resultSets"][0]["rowSet"]
+
+        return jsonify(team_json)
+    
+    
 
 
 #for filtering stats: do response=career.get_dict()
@@ -119,7 +158,40 @@ def handlequery():
 #rowsets[i][thingyour trying to filter].startswith(year_query)
 #once u get it you can add it to csv file
 
+# name_query
+# get players with that name --> player_list
+# player_list = filter_by_season(player_list)
+# player_list = filter_by_team(player_list)
+# player_list = filter_by_pts(player_list)
+# player_list = filter_by_reb(player_list)
+# player_json[""]
+
+# return jsonify(player_json)
+
+def filter_by_season(players: list, season: int):
+    A=[]
+    for player in players:
+        for row in player:
+            
+            if row[1].startswith(season):
+                A.append(row)
+       
+
+
+    return A
+
+def filter_by_team(players: list, team_name: str):
+    B=[]
+    for player in players:
+        for season in player:
+            
+            if season[4].startswith(team_name):
+                B.append(season)
     
+    return B
+
+
+
                 
                         
-app.run(host="0.0.0.0")#local host– my computer/ local ip, only computer itself can access local ip
+app.run(host="0.0.0.0", debug=True)#local host– my computer/ local ip, only computer itself can access local ip
