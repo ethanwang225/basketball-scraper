@@ -134,14 +134,21 @@ def handlequery():
         team_id=team_info['id']
 
         team_json={}
-        
+        #do this for everyone
+        perGame=PerModeSimple.totals
+        if perGameQuery=="PerGame":
+            perGame=PerModeSimple.per_game
+
+        season_type=SeasonTypeAllStar.regular
+        if season_
+
 
         
         #print(player_ids)
         temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
                                                        league_id=LeagueID.nba, 
                                                        season_type_all_star=SeasonTypeAllStar.regular, 
-                                                       per_mode_simple= PerModeSimple.totals ) 
+                                                       per_mode_simple= perGame ) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
