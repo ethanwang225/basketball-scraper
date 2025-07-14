@@ -139,8 +139,13 @@ def handlequery():
         if perGameQuery=="PerGame":
             perGame=PerModeSimple.per_game
 
-        season_type=SeasonTypeAllStar.regular
-        if season_
+        season_type=SeasonTypeAllStar.playoffs
+        if seasonTquery=="RegularSeason":
+            season_type=SeasonTypeAllStar.regular
+
+        league=LeagueID.summer_league
+        if leagueTquery=="NBA":
+            league=LeagueID.nba
 
 
         
