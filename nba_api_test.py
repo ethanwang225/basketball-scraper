@@ -121,6 +121,9 @@ def handlequery():
         if season_query:
             players_json["players"] = filter_by_season(players_json["players"], season_query)
         
+
+        
+        
         if team_query:
             players_json["players"]=filter_by_team(players_json["players"], team_query)
         
@@ -136,30 +139,41 @@ def handlequery():
         team_json={}
         #do this for everyone
         perGame=PerModeSimple.totals
-        if perGameQuery=="PerGame":
+        if perGameQuery=="pergame":
             perGame=PerModeSimple.per_game
+        
 
-        season_type=SeasonTypeAllStar.playoffs
-        if seasonTquery=="RegularSeason":
-            season_type=SeasonTypeAllStar.regular
+        season_type=SeasonTypeAllStar.regular
+        if seasonTquery=="playoffs":
+            season_type=SeasonTypeAllStar.playoffs
+        elif seasonTquery=="preseason":
+            season_type=SeasonTypeAllStar.preseason
 
-        league=LeagueID.summer_league
-        if leagueTquery=="NBA":
-            league=LeagueID.nba
-
+        league=LeagueID.nba
+        if leagueTquery=="summer":
+            league=LeagueID.summer_league
+        elif leagueTquery=="gleague":
+            league=LeagueID.g_league
+        #TO DO: DO THE SAME THING FOR THE OTHER LEAGUES
+        print(season_type)
 
         
         #print(player_ids)
         temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
-                                                       league_id=LeagueID.nba, 
-                                                       season_type_all_star=SeasonTypeAllStar.regular, 
+                                                       league_id=league, 
+                                                       season_type_all_star=season_type, 
                                                        per_mode_simple= perGame ) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
         team_json["headers"]=headers 
         team_json["seasons"]=response["resultSets"][0]["rowSet"]
-
+        
+        
+        if season_query:
+            team_json["seasons"] = filter_by_teamseason(team_json["seasons"], season_query)    
+        
+        
         return jsonify(team_json)
     
     
@@ -192,6 +206,18 @@ def filter_by_season(players: list, season: int):
 
     return A
 
+def filter_by_teamseason(team: list, year: int):
+    A=[]
+    
+    for season in team:
+        if season[3].startswith(year):
+            A.append(season)
+       
+
+
+    return A
+
+
 def filter_by_team(players: list, team_name: str):
     B=[]
     for player in players:
@@ -205,5 +231,5 @@ def filter_by_team(players: list, team_name: str):
 
 
                 
-                        
-app.run(host="0.0.0.0", debug=True)#local host– my computer/ local ip, only computer itself can access local ip
+if __name__=="__main__" :
+    app.run(host="0.0.0.0", debug=True)#local host– my computer/ local ip, only computer itself can access local ip
