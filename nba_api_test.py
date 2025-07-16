@@ -228,15 +228,18 @@ def filter_by_seasonandteam(players: list, year: int, team: str ):
 
     return players
 
+
 def filter_by_team(players: list, team_name: str):
-    B=[]
+    allplayers=[]
     for player in players:
+        playerseason=[]
         for season in player:
             
             if season[4].startswith(team_name):
-                B.append(season)
-    
-    return B
+                playerseason.append(season)
+        if playerseason:
+            allplayers.append(playerseason)
+    return allplayers
 
 
 
