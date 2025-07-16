@@ -195,16 +195,17 @@ def handlequery():
 # return jsonify(player_json)
 
 def filter_by_season(players: list, season: int):
-    A=[]
+    allplayers=[]
     for player in players:
+        playerseason=[]
         for row in player:
             
             if row[1].startswith(season):
-                A.append(row)
-       
+                playerseason.append(row)
+        if playerseason:
+            allplayers.append(playerseason)
 
-
-    return A
+    return allplayers
 
 def filter_by_teamseason(team: list, year: int):
     A=[]
@@ -215,18 +216,17 @@ def filter_by_teamseason(team: list, year: int):
        
 
 
-    return A
+    return [A]
 
 def filter_by_seasonandteam(players: list, year: int, team: str ):
-    A=[]
+   
+    players= filter_by_season(players, year)
     
-    for player in players:
-        if player[1].startswith(year):
-            A.append(player)
+    players=filter_by_team(players, team)
        
 
 
-    return A
+    return players
 
 def filter_by_team(players: list, team_name: str):
     B=[]
