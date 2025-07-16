@@ -118,14 +118,14 @@ def handlequery():
             #         csvfile.write(str(round(row[26]/row[6],2)))
             #         csvfile.write("\n")
             #     csvfile.close()
-        if season_query:
+        
+        if season_query and team_query:
+            players_json["players"] = filter_by_seasonandteam(players_json["players"], season_query, team_query)
+        elif season_query:
             players_json["players"] = filter_by_season(players_json["players"], season_query)
-        
-
-        
-        
-        if team_query:
+        elif team_query:
             players_json["players"]=filter_by_team(players_json["players"], team_query)
+
         
         csvfile.close() 
         return jsonify(players_json)
@@ -217,6 +217,16 @@ def filter_by_teamseason(team: list, year: int):
 
     return A
 
+def filter_by_seasonandteam(players: list, year: int, team: str ):
+    A=[]
+    
+    for player in players:
+        if player[1].startswith(year):
+            A.append(player)
+       
+
+
+    return A
 
 def filter_by_team(players: list, team_name: str):
     B=[]
