@@ -6,6 +6,7 @@ import requests
 import os
 import certifi
 from dotenv import load_dotenv
+import ssl
 
 # Load env variables
 load_dotenv()
@@ -27,7 +28,25 @@ def html():
 
 @app.route("/hello", methods=['GET'])
 def hello():
-    return jsonify({"message":"hello world"}) 
+    import requests
+    from dotenv import load_dotenv
+    import os
+    import certifi
+
+    # Replace with your proxy user credentials.
+    load_dotenv()
+    username=os.getenv("PROXY_USERNAME")
+    password=os.getenv("PROXY_PASSWORD")
+
+    # Port `8000` rotates IPs from your proxy list.
+    address = 'dc.oxylabs.io:8000'
+
+    proxies = {
+        'http': f'https://user-{username}:{password}@{address}'
+    }
+
+    response = requests.get('https://ip.oxylabs.io/location', proxies=proxies, verify=certifi.where())
+    return jsonify({"message":"hello world", "ssl": ssl.OPENSSL_VERSION, "response": response.text})
 @app.route("/players", methods=['GET'])
 def handlequery():
     #checks input of query if user inputs a "name"
@@ -59,7 +78,7 @@ def handlequery():
     
 
     proxies = {
-        'https': f'https://user-{proxy_username}:{proxy_password}@{address}'
+        'http': f'https://user-{proxy_username}:{proxy_password}@{address}'
     }
 
     response = requests.get('https://ip.oxylabs.io/location', proxies=proxies, verify=certifi.where())
@@ -82,7 +101,7 @@ def handlequery():
         for player in player_name:
             player_ids.append(player["id"])
         #print(player_ids)
-        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"https://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
+        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
@@ -99,7 +118,7 @@ def handlequery():
         players_json["players"]=[]
         for id in player_ids:
             csvfile = open('file.csv', 'a')
-            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"https://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
+            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
 
 
         
@@ -179,7 +198,7 @@ def handlequery():
                                                        season_type_all_star=SeasonTypeAllStar.regular, 
                                                        per_mode_simple= PerModeSimple.totals,
                                                        headers=custom_headers,
-                                                       proxy=f"https://user-{proxy_username}:{proxy_password}@{address}",
+                                                       proxy=f"http://user-{proxy_username}:{proxy_password}@{address}",
                                                        timeout=5) 
         response =temp.get_dict()
         
