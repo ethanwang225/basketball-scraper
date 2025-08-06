@@ -44,7 +44,15 @@ def handlequery():
 
 
 
-    
+    # from nba_api.stats.library.http import NBAStatsHTTP
+
+    custom_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer": "https://www.nba.com/",
+        "Origin": "https://www.nba.com",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+
 
     #player_name=players.get_players()
     
@@ -67,7 +75,7 @@ def handlequery():
         for player in player_name:
             player_ids.append(player["id"])
         #print(player_ids)
-        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0]) 
+        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, timeout=5) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
@@ -84,7 +92,7 @@ def handlequery():
         players_json["players"]=[]
         for id in player_ids:
             csvfile = open('file.csv', 'a')
-            career = playercareerstats.PlayerCareerStats(player_id=id) 
+            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, timeout=5) 
 
 
         
@@ -160,9 +168,11 @@ def handlequery():
         
         #print(player_ids)
         temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
-                                                       league_id=league, 
-                                                       season_type_all_star=season_type, 
-                                                       per_mode_simple= perGame ) 
+                                                       league_id=LeagueID.nba, 
+                                                       season_type_all_star=SeasonTypeAllStar.regular, 
+                                                       per_mode_simple= PerModeSimple.totals,
+                                                       headers=custom_headers,
+                                                       timeout=5) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
