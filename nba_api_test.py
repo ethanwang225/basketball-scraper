@@ -23,10 +23,7 @@ def html():
 
 @app.route("/hello", methods=['GET'])
 def hello():
-    name_query = request.args.get("name")
-    team_query= request.args.get("team")
-    season_query=request.args.get("season")
-    return jsonify({"message":"hello world"+name_query+team_query+season_query}) 
+    return jsonify({"message":"hello world"}) 
 @app.route("/players", methods=['GET'])
 def handlequery():
     #checks input of query if user inputs a "name"
