@@ -3,3 +3,4 @@ flask
 requests
 gunicorn
 nba_api
+python-dotenv

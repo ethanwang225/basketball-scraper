@@ -1,14 +1,18 @@
 from nba_api.stats.endpoints import playercareerstats, teamyearbyyearstats
 from nba_api.stats.library.parameters import SeasonTypeAllStar, PerModeSimple, LeagueID
 from flask import Flask, jsonify, current_app, request
-import json
 from nba_api.stats.static import players, teams
+import requests
+import os
+import certifi
+from dotenv import load_dotenv
 
-import csv
+# Load env variables
+load_dotenv()
+proxy_username=os.getenv("PROXY_USERNAME")
+proxy_password=os.getenv("PROXY_PASSWORD")
 
-# Nikola Jokić
-
-
+address = 'dc.oxylabs.io:8000'
 
 #json is like a dictionary
 #
@@ -54,7 +58,13 @@ def handlequery():
     #player_name=players.get_players()
     
 
-    
+    proxies = {
+        'https': f'https://user-{proxy_username}:{proxy_password}@{address}'
+    }
+
+    response = requests.get('https://ip.oxylabs.io/location', proxies=proxies, verify=certifi.where())
+
+    print(response.text)
 
     
     #team_name=teams.find_teams_by_full_name(team_query)
@@ -72,7 +82,7 @@ def handlequery():
         for player in player_name:
             player_ids.append(player["id"])
         #print(player_ids)
-        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, timeout=5) 
+        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"https://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
@@ -89,7 +99,7 @@ def handlequery():
         players_json["players"]=[]
         for id in player_ids:
             csvfile = open('file.csv', 'a')
-            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, timeout=5) 
+            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"https://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
 
 
         
@@ -169,6 +179,7 @@ def handlequery():
                                                        season_type_all_star=SeasonTypeAllStar.regular, 
                                                        per_mode_simple= PerModeSimple.totals,
                                                        headers=custom_headers,
+                                                       proxy=f"https://user-{proxy_username}:{proxy_password}@{address}",
                                                        timeout=5) 
         response =temp.get_dict()
         
