@@ -101,7 +101,7 @@ def handlequery():
         for player in player_name:
             player_ids.append(player["id"])
         #print(player_ids)
-        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
+        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=10) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
@@ -118,7 +118,7 @@ def handlequery():
         players_json["players"]=[]
         for id in player_ids:
             csvfile = open('file.csv', 'a')
-            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
+            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=10) 
 
 
         
@@ -199,7 +199,7 @@ def handlequery():
                                                        per_mode_simple= PerModeSimple.totals,
                                                        headers=custom_headers,
                                                        proxy=f"http://user-{proxy_username}:{proxy_password}@{address}",
-                                                       timeout=5) 
+                                                       timeout=10) 
         response =temp.get_dict()
         
         headers= response["resultSets"][0]["headers"] # list
