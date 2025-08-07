@@ -7,6 +7,7 @@ import os
 import certifi
 from dotenv import load_dotenv
 import ssl
+import time
 
 # Load env variables
 load_dotenv()
@@ -14,6 +15,7 @@ proxy_username=os.getenv("PROXY_USERNAME")
 proxy_password=os.getenv("PROXY_PASSWORD")
 
 address = 'dc.oxylabs.io:8000'
+max_query_retries = 5
 
 #json is like a dictionary
 #
@@ -77,141 +79,147 @@ def handlequery():
     #player_name=players.get_players()
     
 
-    proxies = {
-        'http': f'https://user-{proxy_username}:{proxy_password}@{address}'
-    }
+    for i in range(max_query_retries):
+        try:
+            proxies = {
+                'http': f'https://user-{proxy_username}:{proxy_password}@{address}'
+            }
 
-    response = requests.get('https://ip.oxylabs.io/location', proxies=proxies, verify=certifi.where())
+            response = requests.get('https://ip.oxylabs.io/location', proxies=proxies, verify=certifi.where())
 
-    print(response.text)
-
-    
-    #team_name=teams.find_teams_by_full_name(team_query)
-    #result is a list of all the player that matches the query 
-    #print(result)
-    
-
-    if name_query:
-        player_name=players.find_players_by_full_name(name_query)
-        players_json={}
-        
-
-        print(len(player_name))
-        player_ids=[]
-        for player in player_name:
-            player_ids.append(player["id"])
-        #print(player_ids)
-        temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=10) 
-        response =temp.get_dict()
-        
-        headers= response["resultSets"][0]["headers"] # list
-        players_json["headers"]=headers # players_json = {"headers": [list of stat names (PTS, REB, etc.)]}
-
-
-        csvfile = open('file.csv', 'w')
-        for header in headers:
-            csvfile.write(header + ",")
-        csvfile.write('PTS/GAME')
-        csvfile.write('\n')
-
-
-        players_json["players"]=[]
-        for id in player_ids:
-            csvfile = open('file.csv', 'a')
-            career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=10) 
-
-
-        
-            response =career.get_dict()
-        
-            
-            rows=response["resultSets"][0]["rowSet"]
-            players_json["players"].append(rows)
-
-        
-
-                # newrows=[]
-                # for i in range(len(rows)):
-                #     if rows[i][1].startswith(str(season_query)):
-                #         newrows.append(rows[i])
-                #     else:
-                #         pass
-
-                # for row in newrows:
-                #     for data in row:
-                #         csvfile.write(str(data) +",")
-                #     csvfile.write(str(round(row[26]/row[6],2)))
-                #     csvfile.write("\n")
-                # csvfile.close()
+            print(response.text)
 
             
-            # else:    
-            #     for row in rows:
-            #         for data in row:
-            #             csvfile.write(str(data) +",")
-            #         csvfile.write(str(round(row[26]/row[6],2)))
-            #         csvfile.write("\n")
-            #     csvfile.close()
-        
-        if season_query and team_query:
-            players_json["players"] = filter_by_seasonandteam(players_json["players"], season_query, team_query)
-        elif season_query:
-            players_json["players"] = filter_by_season(players_json["players"], season_query)
-        elif team_query:
-            players_json["players"]=filter_by_team(players_json["players"], team_query)
+            #team_name=teams.find_teams_by_full_name(team_query)
+            #result is a list of all the player that matches the query 
+            #print(result)
+            
 
-        
-        csvfile.close() 
-        return jsonify(players_json)
+            if name_query:
+                player_name=players.find_players_by_full_name(name_query)
+                players_json={}
+                
+
+                print(len(player_name))
+                player_ids=[]
+                for player in player_name:
+                    player_ids.append(player["id"])
+                #print(player_ids)
+                temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
+                response =temp.get_dict()
+                
+                headers= response["resultSets"][0]["headers"] # list
+                players_json["headers"]=headers # players_json = {"headers": [list of stat names (PTS, REB, etc.)]}
 
 
-    elif team_query:
-        team_info=teams.find_team_by_abbreviation(team_query)
-        print(team_info)
-        team_id=team_info['id']
+                csvfile = open('file.csv', 'w')
+                for header in headers:
+                    csvfile.write(header + ",")
+                csvfile.write('PTS/GAME')
+                csvfile.write('\n')
 
-        team_json={}
-        #do this for everyone
-        perGame=PerModeSimple.totals
-        if perGameQuery=="pergame":
-            perGame=PerModeSimple.per_game
-        
 
-        season_type=SeasonTypeAllStar.regular
-        if seasonTquery=="playoffs":
-            season_type=SeasonTypeAllStar.playoffs
-        elif seasonTquery=="preseason":
-            season_type=SeasonTypeAllStar.preseason
+                players_json["players"]=[]
+                for id in player_ids:
+                    csvfile = open('file.csv', 'a')
+                    career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
 
-        league=LeagueID.nba
-        if leagueTquery=="summer":
-            league=LeagueID.summer_league
-        elif leagueTquery=="gleague":
-            league=LeagueID.g_league
-        #TO DO: DO THE SAME THING FOR THE OTHER LEAGUES
-        print(season_type)
 
-        
-        #print(player_ids)
-        temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
-                                                       league_id=LeagueID.nba, 
-                                                       season_type_all_star=SeasonTypeAllStar.regular, 
-                                                       per_mode_simple= PerModeSimple.totals,
-                                                       headers=custom_headers,
-                                                       proxy=f"http://user-{proxy_username}:{proxy_password}@{address}",
-                                                       timeout=10) 
-        response =temp.get_dict()
-        
-        headers= response["resultSets"][0]["headers"] # list
-        team_json["headers"]=headers 
-        team_json["seasons"]=response["resultSets"][0]["rowSet"]
-        
-        
-        if season_query:
-            team_json["seasons"] = filter_by_teamseason(team_json["seasons"], season_query)    
-        
-        
-        return jsonify(team_json)
+                
+                    response =career.get_dict()
+                
+                    
+                    rows=response["resultSets"][0]["rowSet"]
+                    players_json["players"].append(rows)
+
+                
+
+                        # newrows=[]
+                        # for i in range(len(rows)):
+                        #     if rows[i][1].startswith(str(season_query)):
+                        #         newrows.append(rows[i])
+                        #     else:
+                        #         pass
+
+                        # for row in newrows:
+                        #     for data in row:
+                        #         csvfile.write(str(data) +",")
+                        #     csvfile.write(str(round(row[26]/row[6],2)))
+                        #     csvfile.write("\n")
+                        # csvfile.close()
+
+                    
+                    # else:    
+                    #     for row in rows:
+                    #         for data in row:
+                    #             csvfile.write(str(data) +",")
+                    #         csvfile.write(str(round(row[26]/row[6],2)))
+                    #         csvfile.write("\n")
+                    #     csvfile.close()
+                
+                if season_query and team_query:
+                    players_json["players"] = filter_by_seasonandteam(players_json["players"], season_query, team_query)
+                elif season_query:
+                    players_json["players"] = filter_by_season(players_json["players"], season_query)
+                elif team_query:
+                    players_json["players"]=filter_by_team(players_json["players"], team_query)
+
+                
+                csvfile.close() 
+                return jsonify(players_json)
+
+
+            elif team_query:
+                team_info=teams.find_team_by_abbreviation(team_query)
+                print(team_info)
+                team_id=team_info['id']
+
+                team_json={}
+                #do this for everyone
+                perGame=PerModeSimple.totals
+                if perGameQuery=="pergame":
+                    perGame=PerModeSimple.per_game
+                
+
+                season_type=SeasonTypeAllStar.regular
+                if seasonTquery=="playoffs":
+                    season_type=SeasonTypeAllStar.playoffs
+                elif seasonTquery=="preseason":
+                    season_type=SeasonTypeAllStar.preseason
+
+                league=LeagueID.nba
+                if leagueTquery=="summer":
+                    league=LeagueID.summer_league
+                elif leagueTquery=="gleague":
+                    league=LeagueID.g_league
+                #TO DO: DO THE SAME THING FOR THE OTHER LEAGUES
+                print(season_type)
+
+                
+                #print(player_ids)
+                temp = teamyearbyyearstats.TeamYearByYearStats(team_id=team_id, 
+                                                            league_id=LeagueID.nba, 
+                                                            season_type_all_star=SeasonTypeAllStar.regular, 
+                                                            per_mode_simple= PerModeSimple.totals,
+                                                            headers=custom_headers,
+                                                            proxy=f"http://user-{proxy_username}:{proxy_password}@{address}",
+                                                            timeout=5) 
+                response =temp.get_dict()
+                
+                headers= response["resultSets"][0]["headers"] # list
+                team_json["headers"]=headers 
+                team_json["seasons"]=response["resultSets"][0]["rowSet"]
+                
+                
+                if season_query:
+                    team_json["seasons"] = filter_by_teamseason(team_json["seasons"], season_query)    
+                
+                
+                return jsonify(team_json)
+        except Exception as e:
+            print(f"Attempt {i+1} failed: {e}")
+            time.sleep(2)
+    return None
     
     
 
@@ -253,7 +261,7 @@ def filter_by_teamseason(team: list, year: int):
        
 
 
-    return [A]
+    return A
 
 def filter_by_seasonandteam(players: list, year: int, team: str ):
    
