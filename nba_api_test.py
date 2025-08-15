@@ -97,18 +97,21 @@ def handlequery():
 
             if name_query:
                 player_name=players.find_players_by_full_name(name_query)
-                players_json={}
                 
+                players_json={}
+                player_names=[]
 
                 print(len(player_name))
                 player_ids=[]
                 for player in player_name:
+                    player_names.append(player["full_name"])
                     player_ids.append(player["id"])
                 #print(player_ids)
                 temp = playercareerstats.PlayerCareerStats(player_id=player_ids[0], headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
                 response =temp.get_dict()
                 
                 headers= response["resultSets"][0]["headers"] # list
+                headers.insert(0, "PLAYER_NAME")
                 players_json["headers"]=headers # players_json = {"headers": [list of stat names (PTS, REB, etc.)]}
 
 
@@ -120,7 +123,7 @@ def handlequery():
 
 
                 players_json["players"]=[]
-                for id in player_ids:
+                for idx, id in enumerate(player_ids):
                     csvfile = open('file.csv', 'a')
                     career = playercareerstats.PlayerCareerStats(player_id=id, headers=custom_headers, proxy=f"http://user-{proxy_username}:{proxy_password}@{address}", timeout=5) 
 
@@ -130,6 +133,8 @@ def handlequery():
                 
                     
                     rows=response["resultSets"][0]["rowSet"]
+                    for row in rows:
+                        row.insert(0, player_names[idx])
                     players_json["players"].append(rows)
 
                 
@@ -245,7 +250,7 @@ def filter_by_season(players: list, season: int):
         playerseason=[]
         for row in player:
             
-            if row[1].startswith(season):
+            if row[2].startswith(season):
                 playerseason.append(row)
         if playerseason:
             allplayers.append(playerseason)
@@ -280,7 +285,7 @@ def filter_by_team(players: list, team_name: str):
         playerseason=[]
         for season in player:
             
-            if season[4].startswith(team_name):
+            if season[5].startswith(team_name):
                 playerseason.append(season)
         if playerseason:
             allplayers.append(playerseason)
