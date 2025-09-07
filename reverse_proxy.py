@@ -64,14 +64,6 @@ def handlequery():
     leagueTquery=request.args.get("leaguetype")
     perGameQuery=request.args.get("pergame")
 
-    print(name_query)
-    print(team_query)
-    print(season_query)
-    print(seasonTquery)
-    print(leagueTquery)
-    print(perGameQuery)
-
-
 
 
     # from nba_api.stats.library.http import NBAStatsHTTP
@@ -139,12 +131,14 @@ def handlequery():
                 csvfile.write('PTS/GAME')
                 csvfile.write('\n')
 
+
                 players_json["players"]=[]
                 for idx, id in enumerate(player_ids):
                     csvfile = open('file.csv', 'a')
                     career = playercareerstats.PlayerCareerStats(player_id=id, timeout=5) 
 
 
+                
                     response =career.get_dict()
                 
                     
@@ -152,6 +146,22 @@ def handlequery():
                     for row in rows:
                         row.insert(0, player_names[idx])
                     players_json["players"].append(rows)
+
+                
+
+                        # newrows=[]
+                        # for i in range(len(rows)):
+                        #     if rows[i][1].startswith(str(season_query)):
+                        #         newrows.append(rows[i])
+                        #     else:
+                        #         pass
+
+                        # for row in newrows:
+                        #     for data in row:
+                        #         csvfile.write(str(data) +",")
+                        #     csvfile.write(str(round(row[26]/row[6],2)))
+                        #     csvfile.write("\n")
+                        # csvfile.close()
 
                     
                     # else:    
@@ -162,16 +172,15 @@ def handlequery():
                     #         csvfile.write("\n")
                     #     csvfile.close()
                 
-                if season_query != "None" and team_query != "None":
+                if season_query and team_query:
                     players_json["players"] = filter_by_seasonandteam(players_json["players"], season_query, team_query)
-                elif season_query != "None":
+                elif season_query:
                     players_json["players"] = filter_by_season(players_json["players"], season_query)
-                elif team_query != "None":
+                elif team_query:
                     players_json["players"]=filter_by_team(players_json["players"], team_query)
 
                 
                 csvfile.close() 
-                print(players_json)
                 return jsonify(players_json)
 
 
@@ -215,10 +224,9 @@ def handlequery():
                 team_json["seasons"]=response["resultSets"][0]["rowSet"]
                 
                 
-                if season_query != "None":
+                if season_query:
                     team_json["seasons"] = filter_by_teamseason(team_json["seasons"], season_query)    
                 
-                print(team_json)
                 
                 return jsonify(team_json)
         except Exception as e:
@@ -245,7 +253,6 @@ def handlequery():
 # return jsonify(player_json)
 
 def filter_by_season(players: list, season: int):
-    print("filtering by season")
     allplayers=[]
     for player in players:
         playerseason=[]
@@ -259,7 +266,6 @@ def filter_by_season(players: list, season: int):
     return allplayers
 
 def filter_by_teamseason(team: list, year: int):
-    print("filtering by team's season")
     A=[]
     
     for season in team:
@@ -271,7 +277,6 @@ def filter_by_teamseason(team: list, year: int):
     return A
 
 def filter_by_seasonandteam(players: list, year: int, team: str ):
-    print("filtering by season and team for player")
    
     players= filter_by_season(players, year)
     
@@ -283,7 +288,6 @@ def filter_by_seasonandteam(players: list, year: int, team: str ):
 
 
 def filter_by_team(players: list, team_name: str):
-    print("filtering by team for player")
     allplayers=[]
     for player in players:
         playerseason=[]
