@@ -66,7 +66,7 @@ def handlequery():
 
     url = f"https://d6e444641b34.ngrok-free.app/players?name={name_query}&team={team_query}&season={season_query}&seasontype={seasonTquery}&leaguetype={leagueTquery}&pergame={perGameQuery}"
 
-    r = requests.get()
+    r = requests.get(url)
     return r.json()
 
 
